@@ -205,17 +205,20 @@
             });
 
             // Generate Map Button
-            $('#generate-map-btn').click(function() {
+ $('#generate-map-btn').click(function() {
                 clearError();
                 var selectedDataset = $('#dataset-select').val();
                 var selectedColumn = $('#column-select').val();
                 var mapContainer = $('#map-container');
                 var mapDiv = $('#map');
+                var generateBtn = $(this);
 
                 if (!selectedDataset || !selectedColumn) {
                     showError('Please select both a dataset and a column');
                     return;
                 }
+
+                generateBtn.prop('disabled', false);
 
                 $.ajax({
                     url: '/generate_map',
@@ -224,13 +227,22 @@
                         dataset: selectedDataset,
                         column: selectedColumn
                     },
-                    success: function(mapHtml) {
-                        mapDiv.html(mapHtml);
-                        mapContainer.show();
+                    success: function(response) {
+                        if (response.success) {
+                            mapDiv.empty();
+                            mapDiv.html(response.map_html);
+                            mapContainer.show();
+                        } else {
+                            showError(response.error || 'Failed to generate map');
+                            mapContainer.hide();
+                        }
                     },
-                    error: function() {
-                        showError('Failed to generate map');
+                    error: function(xhr, status, error) {
+                        showError('Failed to generate map: ' + error);
                         mapContainer.hide();
+                    },
+                    complete: function() {
+                        generateBtn.prop('disabled',false);
                     }
                 });
             });
