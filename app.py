@@ -188,12 +188,22 @@ def generate_map():
         generated_map = choropleth_map(dataset_name, column_name)
 
         if generated_map:
-            return generated_map.get_root().render()
+            map_html = generated_map.get_root().render()
+            return jsonify({
+                'success': True,
+                'map_html': map_html
+            })
         else:
-            return "Error creating map", 500
+            return jsonify({
+                'success': False,
+                'error' : 'Error creating map'
+            }), 500
     except Exception as e:
         logging.error(f"Map generation error: {str(e)}")
-        return "An unexpected error occurred", 500
+        return jsonify({
+            'success' : False,
+            'error' : 'An expected error occured'
+        }), 500
 
 if __name__ == '__main__':
     load_data()
